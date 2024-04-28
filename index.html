@@ -1,0 +1,321 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+<!-- Required meta tags -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<!-- Bootstrap CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/7.2.0/sweetalert2.min.css">
+<title>Helscout</title>
+<style>
+.form-section-1 {
+	border:1px solid #DDD;
+	padding:10px;
+	background:#d9ead3;
+	margin-bottom:10px
+}
+.form-section-2 {
+	border:1px solid #DDD;
+	padding:10px;
+	background:#cfe2f3;
+	margin-bottom:20px
+}
+.container h5 {
+	padding:20px 0px;
+}
+.form-group label {
+	font-size:13px;
+	font-weight:500;
+	margin-bottom:0px;
+}
+.form-group {
+	margin-bottom:3px;
+}
+.response-section p {
+	font-size:14px;
+	font-weight:500;
+}
+.response-section {
+	border:1px solid #DDD;
+	padding:10px;
+	background:#EEE;
+}
+.response-section #response_result {
+	padding:10px;
+	background:#FFF;
+	height:738px;
+	overflow:hidden;
+}
+.text-red {
+	color:#F00
+}
+.buttons {
+	display:block;
+	margin-bottom:50px;
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="row">
+    <div class="col-lg-12">
+      <h5>Create / Update Helpscout Articles</h5>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-5">
+      <form id="fromdata">
+      <div class="form-section-1">
+        <div class="row">
+          <div class="col-lg-6">
+            <div class="form-group">
+              <label for="exampleFormControlInput1">Endpoint</label>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="endpoint" id="endpoint1" value="Create" >
+                <label class="form-check-label" for="endpoint1"> Create </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="endpoint" id="endpoint2" value="Update">
+                <label class="form-check-label" for="endpoint2"> Update </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="endpoint" id="endpoint3" value="Get" checked>
+                <label class="form-check-label" for="endpoint3"> Get </label>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <div class="form-group">
+              <label for="exampleFormControlSelect1">Reload</label>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="realod" id="realod1" value="Yes" checked>
+                <label class="form-check-label" for="realod1"> Yes </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="realod" id="exampleRadios2" value="No">
+                <label class="form-check-label" for="realod2"> No </label>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-12">
+            <div class="form-group">
+              <label for="apikey">API Key<span class="text-red">*</span></label>
+              <input type="text" class="form-control" id="apikey" name="apikey" />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="form-section-2">
+        <div class="row">
+          <div class="col-lg-12">
+            <div class="form-group">
+              <label for="article_id">Article ID or Collection ID<span class="text-red">*</span></label>
+              <input type="text" class="form-control" id="article_id" name="article_id" />
+            </div>
+          </div>
+          <div class="col-lg-12">
+            <div class="form-group">
+              <label for="slug">Slug</label>
+              <input type="text" class="form-control" id="slug" name="slug" />
+            </div>
+          </div>
+          <div class="col-lg-12">
+            <div class="form-group">
+              <label for="article_name">Article Name</label>
+              <input type="text" class="form-control" id="article_name" name="article_name" />
+            </div>
+          </div>
+          <div class="col-lg-12">
+            <div class="form-group">
+              <label for="category">Category</label>
+              <input type="text" class="form-control" id="category" name="category" />
+            </div>
+          </div>
+          <div class="col-lg-12">
+            <div class="form-group">
+              <label for="related_articles">Related Articles</label>
+              <input type="text" class="form-control" id="related_articles" name="related_articles" />
+            </div>
+          </div>
+          <div class="col-lg-12">
+            <div class="form-group">
+              <label for="keywords">Keywords</label>
+              <input type="text" class="form-control" id="keywords" name="keywords" />
+            </div>
+          </div>
+          <div class="col-lg-12">
+            <div class="form-group">
+              <label for="article_text">Article HTML<span class="text-red">*</span></label>
+              <textarea class="form-control" id="article_text" name="article_text" rows="3" ></textarea>
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <div class="form-group">
+              <label for="exampleFormControlSelect1">Status</label>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="status" id="status1" value="published" checked>
+                <label class="form-check-label" for="status1"> Published </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="status" id="status2" value="notpublished">
+                <label class="form-check-label" for="status2"> Unpublished </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      </form>
+      <div class="buttons" >
+        <button type="button" class="btn btn-primary" id="SubmitBTN" >Submit</button>
+        <button type="button" onClick="location.reload();" class="btn btn-secondary">Reset</button>
+      </div>
+    </div>
+    <div class="col-lg-7">
+      <div class="response-section">
+        <p>Response</p>
+        <textarea class="form-control" readonly id="response_result"></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Optional JavaScript --> 
+<!-- jQuery first, then Popper.js, then Bootstrap JS --> 
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script> 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/7.2.0/sweetalert2.all.min.js"></script>
+<script>
+$(document).ready(function(){
+	$('#SubmitBTN').click(function(){
+		var endpoint = $('input[name=endpoint]:checked').val();
+		var selectReload = $('input[name=reload]:checked').val();
+		var apikey = $('#apikey').val();
+		var article_id = $('#article_id').val();
+
+		if($.trim(apikey) == ""){
+			swal(
+				'Error!',
+				'Please enter your API Key.',
+				'error'
+			)
+			return false;
+		}else if($.trim(article_id) == ""){
+			swal(
+				'Error!',
+				'Please enter your Article ID or Collection ID.',
+				'error'
+			)
+			return false;
+		}else{
+			// Get API
+			if($.trim(endpoint) == "Get"){
+        $('#SubmitBTN').html('Processing...');
+        $.ajax({
+              headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+              type: 'POST',
+              url: "./actions.php",
+              data: {article_id:article_id, apikey:apikey, type:'Get'},
+              success: function(response){
+                if($.trim(response) != ''){
+                  setResult(response);
+                }
+                $('#SubmitBTN').html('Submit');
+              }
+          });
+			}		
+      if($.trim(endpoint) == "Update" || $.trim(endpoint) == "Create"){
+        var article_text = $('#article_text').val();
+        var slug = $('#slug').val();
+        var saveData = true;
+        if($.trim(article_text) == ""){
+            swal(
+            'Error!',
+            'Please enter article text.',
+            'error'
+          )
+          saveData = false
+          return false;
+      }
+
+      if($.trim(endpoint) == "Create"  && $.trim(slug) == ""){
+            swal(
+            'Error!',
+            'Please enter article slug.',
+            'error'
+          )
+          saveData = false
+          return false;
+      }
+      
+      if(saveData){
+          $('#SubmitBTN').html('Processing...');
+          $.ajax({
+                headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                type: 'POST',
+                url: "./actions.php",
+                data: $( '#fromdata' ).serialize(),
+                success: function(response){
+                  response = JSON.parse(response);
+                  if(response['message'] == 'Success'){
+                    var text = 'Article updated successfully.';
+                    if($.trim(endpoint) == "Create"){
+                      text = 'Article created successfully.';
+                    }
+                    if(typeof response['response'] != 'undefiend'){
+                      setResult(response['response']);
+                    }
+                    swal(
+                      'Success!',
+                      text,
+                      'success'
+                      )
+                  }else{
+                    swal(
+                      'Error!',
+                      response['response'],
+                      'error'
+                    )
+                  }              
+                  $('#SubmitBTN').html('Submit');
+                }
+            });
+          }
+			}			
+		}
+	});
+});
+
+function setResult(response){
+  $('#response_result').html(response);
+  if($.trim(response) != ''){
+  response = JSON.parse(response);
+    if(typeof response.article.text !='undefined'){
+      $('#article_text').val(response.article.text);
+    }
+    if(typeof response.article.slug !='undefined'){
+      $('#slug').val(response.article.slug);
+    }
+    if(typeof response.article.name !='undefined'){
+      $('#article_name').val(response.article.name);
+    }
+    if(typeof response.article.categories !='undefined' && response.article.categories.length > 0){
+      $('#category').val(response.article.categories.join(','));
+    }
+    if(typeof response.article.keywords !='undefined' && response.article.keywords.length > 0){
+      $('#keywords').val(response.article.keywords.join(','));
+    }
+    if(typeof response.article.related !='undefined' && response.article.related.length > 0){
+      $('#related_articles').val(response.article.related.join(','));
+    }
+    if(typeof response.article.status !='undefined'){
+      $("input[name=status][value='"+response.article.status+"']").prop("checked",true);
+    }
+  }
+}
+</script>
+</body>
+</html>
