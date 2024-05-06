@@ -124,7 +124,7 @@
           </div>
           <div class="col-lg-12">
             <div class="form-group">
-              <label for="article_name">Article Name</label>
+              <label for="article_name">Artical Name</label>
               <input type="text" class="form-control" id="article_name" name="article_name" />
             </div>
           </div>
@@ -195,7 +195,6 @@ $(document).ready(function(){
 		var selectReload = $('input[name=reload]:checked').val();
 		var apikey = $('#apikey').val();
 		var article_id = $('#article_id').val();
-
 		if($.trim(apikey) == ""){
 			swal(
 				'Error!',
@@ -214,18 +213,7 @@ $(document).ready(function(){
 			// Get API
 			if($.trim(endpoint) == "Get"){
         $('#SubmitBTN').html('Processing...');
-        $.ajax({
-              headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-              type: 'POST',
-              url: "./actions.php",
-              data: {article_id:article_id, apikey:apikey, type:'Get'},
-              success: function(response){
-                if($.trim(response) != ''){
-                  setResult(response);
-                }
-                $('#SubmitBTN').html('Submit');
-              }
-          });
+        getDetails(article_id,apikey);
 			}		
       if($.trim(endpoint) == "Update" || $.trim(endpoint) == "Create"){
         var article_text = $('#article_text').val();
@@ -253,41 +241,262 @@ $(document).ready(function(){
       
       if(saveData){
           $('#SubmitBTN').html('Processing...');
-          $.ajax({
-                headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-                type: 'POST',
-                url: "./actions.php",
-                data: $( '#fromdata' ).serialize(),
-                success: function(response){
-                  response = JSON.parse(response);
-                  if(response['message'] == 'Success'){
-                    var text = 'Article updated successfully.';
-                    if($.trim(endpoint) == "Create"){
-                      text = 'Article created successfully.';
-                    }
-                    if(typeof response['response'] != 'undefiend'){
-                      setResult(response['response']);
-                    }
-                    swal(
-                      'Success!',
-                      text,
-                      'success'
-                      )
-                  }else{
-                    swal(
-                      'Error!',
-                      response['response'],
-                      'error'
-                    )
-                  }              
-                  $('#SubmitBTN').html('Submit');
-                }
-            });
+          if($.trim(endpoint) == "Update"){
+            updateArticle($( '#fromdata' ).serialize());
           }
+          if($.trim(endpoint) == "Create"){
+            createArticle($( '#fromdata' ).serialize());
+          }
+          return;
 			}			
 		}
+  }
 	});
 });
+function createArticle(formData){
+  // Parse serialized data into JavaScript object
+    var parsedData = {};
+    $.each(formData.split('&'), function() {
+        var keyValue = this.split('=');
+        parsedData[decodeURIComponent(keyValue[0])] = decodeURIComponent(keyValue[1]);
+    });
+    
+    var getToken = btoa(parsedData['apikey']+':123456');
+    var queryString = '';
+    var reload = false;
+    var categories = [];
+    var related = [];
+    var keywords = [];
+
+    if(parsedData['realod'] == "Yes"){
+      queryString = '?reload=true';
+      reload = true;
+    }
+    let postData = {
+      "collectionId": parsedData['article_id'],
+      "name": parsedData['article_name'],
+      "status": parsedData['status'],
+      "slug": parsedData['slug'],
+      "text": parsedData['article_text'],
+      "reload": reload
+    };
+
+    if(typeof parsedData['category'] != "undefined" && $.trim(parsedData['category']) != ""){
+        categories = parsedData['category'].split(',');
+        if(categories.length > 0){
+          postData.categories = categories;
+        }
+    }
+    if(typeof parsedData['related_articles'] != "undefined" && $.trim(parsedData['related_articles']) != ""){
+        related = parsedData['related_articles'].split(',');
+        if(related.length > 0){
+          postData.related = related;
+        }
+    }
+    if(typeof parsedData['keywords'] != "undefined" && $.trim(parsedData['keywords']) != ""){
+        keywords = parsedData['keywords'].split(',');
+        if(keywords.length > 0){
+          postData.keywords = keywords;
+        }
+    }
+    var settings = {
+    "url": "https://docsapi.helpscout.net/v1/articles"+queryString,
+    "method": "POST",
+    "timeout": 0,
+    "headers": {
+      "Content-Type": "application/json",
+      "Authorization": "Basic "+getToken
+    },
+    "data": JSON.stringify(postData),
+    "processData": false,
+    "mimeType": "multipart/form-data",
+    "contentType": false
+  };
+
+  message = 'Internal server error.'
+  $.ajax(settings).done(function (response) {
+    var text = 'Article created successfully.';
+    if($.trim(response) != ''){
+      $('#response_result').html(response);
+    }
+    swal(
+      'Success!',
+      text,
+      'success'
+      )
+      $('#SubmitBTN').html('Submit');
+
+  }).fail(function(jqXHR, textStatus, errorThrown) {
+    // Error handler
+    if (jqXHR.status === 201) {
+      var text = 'Article updated successfully.';
+      if($.trim(response) != ''){
+        $('#response_result').html(response);
+      }
+      swal(
+        'Success!',
+        text,
+        'success'
+        )
+      $('#SubmitBTN').html('Submit');
+
+    }else if (jqXHR.status === 400) {
+        // Handle 400 error here
+        if(jqXHR.responseText.length > 0){
+          var jsonObj = JSON.parse(jqXHR.responseText);
+          // Iterate over object properties using forEach
+          $.each(jsonObj, function(key, value) {
+            if(key != "code"){
+               if(key == "error"){
+                message = jsonObj[key];
+              }else{
+                message = value.length > 0 ? value[0]:value;
+              }
+            }
+          });
+          swal(
+              'Error!',
+              message,
+              'error'
+            );
+            $('#SubmitBTN').html('Submit');
+        }
+    } else {
+        console.log("Error:", errorThrown);
+        $('#SubmitBTN').html('Submit');
+        // Handle other errors here
+    }
+});
+
+}
+
+
+function updateArticle(formData){
+  // Parse serialized data into JavaScript object
+    var parsedData = {};
+    $.each(formData.split('&'), function() {
+        var keyValue = this.split('=');
+        parsedData[decodeURIComponent(keyValue[0])] = decodeURIComponent(keyValue[1]);
+    });
+    
+    var getToken = btoa(parsedData['apikey']+':123456');
+    var queryString = '';
+    var reload = false;
+    var categories = [];
+    var related = [];
+    var keywords = [];
+
+    if(parsedData['realod'] == "Yes"){
+      queryString = '?reload=true';
+      reload = true;
+    }
+    let postData = {
+      "name": parsedData['article_name'],
+      "status": parsedData['status'],
+      "slug": parsedData['slug'],
+      "text": parsedData['article_text'],
+      "reload": reload
+    };
+
+    if(typeof parsedData['category'] != "undefined" && $.trim(parsedData['category']) != ""){
+        categories = parsedData['category'].split(',');
+        if(categories.length > 0){
+          postData.categories = categories;
+        }
+    }
+    if(typeof parsedData['related_articles'] != "undefined" && $.trim(parsedData['related_articles']) != ""){
+        related = parsedData['related_articles'].split(',');
+        if(related.length > 0){
+          postData.related = related;
+        }
+    }
+    if(typeof parsedData['keywords'] != "undefined" && $.trim(parsedData['keywords']) != ""){
+        keywords = parsedData['keywords'].split(',');
+        if(keywords.length > 0){
+          postData.keywords = keywords;
+        }
+    }
+    var settings = {
+    "url": "https://docsapi.helpscout.net/v1/articles/"+parsedData['article_id']+queryString,
+    "method": "PUT",
+    "timeout": 0,
+    "headers": {
+      "Content-Type": "application/json",
+      "Authorization": "Basic "+getToken
+    },
+    "data": JSON.stringify(postData),
+    "processData": false,
+    "mimeType": "multipart/form-data",
+    "contentType": false
+  };
+
+  message = 'Internal server error.'
+  $.ajax(settings).done(function (response) {
+    var text = 'Article updated successfully.';
+    if($.trim(response) != ''){
+      $('#response_result').html(response);
+    }
+    swal(
+      'Success!',
+      text,
+      'success'
+      )
+      $('#SubmitBTN').html('Submit');
+
+  }).fail(function(jqXHR, textStatus, errorThrown) {
+    // Error handler
+    if (jqXHR.status === 400) {
+        // Handle 400 error here
+        if(jqXHR.responseText.length > 0){
+          var jsonObj = JSON.parse(jqXHR.responseText);
+          // Iterate over object properties using forEach
+          $.each(jsonObj, function(key, value) {
+            if(key != "code"){
+               if(key == "error"){
+                message = jsonObj[key];
+              }else{
+                message = value.length > 0 ? value[0]:value;
+              }
+            }
+          });
+          swal(
+              'Error!',
+              message,
+              'error'
+            );
+            $('#SubmitBTN').html('Submit');
+        }
+    } else {
+        console.log("Error:", errorThrown);
+        $('#SubmitBTN').html('Submit');
+        // Handle other errors here
+    }
+});
+
+}
+
+function getDetails(article_id, apikey ){
+  var getToken = btoa(apikey+':123456');
+  var form = new FormData();
+  var settings = {
+    "url": "https://docsapi.helpscout.net/v1/articles/"+article_id,
+    "method": "GET",
+    "timeout": 0,
+    "headers": {
+      "Authorization": "Basic "+getToken
+    },
+    "processData": false,
+    "mimeType": "multipart/form-data",
+    "contentType": false
+  };
+
+  $.ajax(settings).done(function (response) {
+    if($.trim(response) != ''){
+      setResult(response);
+    }
+    $('#SubmitBTN').html('Submit');
+  })
+}
 
 function setResult(response){
   $('#response_result').html(response);
